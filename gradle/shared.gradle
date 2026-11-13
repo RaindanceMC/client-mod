@@ -1,0 +1,36 @@
+// Applied from each build's settings.gradle: one mod version and one protocol version for the whole composite.
+def props = new Properties()
+new File(buildscript.sourceFile.parentFile, 'shared.properties').withInputStream { props.load(it) }
+
+gradle.beforeProject { project ->
+	props.each { key, value ->
+		if (!project.hasProperty(key)) {
+			project.ext.set(key, value)
+		}
+	}
+}
+
+// rains-client-protocol comes from the private registry (RaindanceMC/client-protocol's CI publishes it).
+// CI passes REPOSILITE_USERNAME / REPOSILITE_PASSWORD; a developer machine has packagesUsername /
+// packagesPassword in ~/.gradle/gradle.properties, or the protocol built locally with `mvn install`.
+// Only our own group is looked for in either, so nothing else is ever served from them.
+gradle.beforeProject { project ->
+	project.repositories {
+		mavenLocal {
+			content {
+				includeGroup 'de.raindancer'
+			}
+		}
+		maven {
+			name = 'packages'
+			url = 'https://packages.tstieh.de/releases'
+			credentials {
+				username = System.getenv('REPOSILITE_USERNAME') ?: project.findProperty('packagesUsername')
+				password = System.getenv('REPOSILITE_PASSWORD') ?: project.findProperty('packagesPassword')
+			}
+			content {
+				includeGroup 'de.raindancer'
+			}
+		}
+	}
+}

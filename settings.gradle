@@ -1,0 +1,8 @@
+rootProject.name = 'client-mod'
+
+// Independent builds rather than subprojects: everything that never touches a Minecraft class is one
+// build, and each game version is its own, so no version's Loom, mappings or Java level leaks into another.
+includeBuild 'common'
+includeBuild 'versions/fabric-26.3'
+includeBuild 'versions/fabric-26.2'
+includeBuild 'versions/fabric-1.21.11'

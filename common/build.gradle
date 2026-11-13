@@ -1,0 +1,39 @@
+plugins {
+	id 'java-library'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+	mavenCentral()
+}
+
+// 21: the 1.21.x adapter runs inside a Java 21 game. The 26.x adapters (25) read these class files.
+tasks.named('compileJava', JavaCompile) {
+	options.release = 21
+	options.encoding = 'UTF-8'
+}
+
+tasks.named('compileTestJava', JavaCompile) {
+	options.release = 21
+	options.encoding = 'UTF-8'
+}
+
+dependencies {
+	api "de.raindancer:rains-client-protocol:${project.protocol_version}"
+
+	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
+	testImplementation "org.assertj:assertj-core:${project.assertj_version}"
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// No Minecraft on this classpath, which is the point: the handshake, every layout and every animation
+// are tested without a game, and look the same in every version because they are the same code.
+test {
+	useJUnitPlatform()
+	testLogging {
+		events 'failed'
+		exceptionFormat 'full'
+	}
+}

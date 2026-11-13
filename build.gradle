@@ -1,0 +1,11 @@
+// The root build owns no code: `./gradlew build` reaches every build of the composite at once.
+// The names are the included builds' directory names, which is what Gradle keys them by.
+def builds = ['common', 'fabric-26.3', 'fabric-26.2', 'fabric-1.21.11']
+
+['build', 'test', 'clean'].each { name ->
+	tasks.register(name) {
+		group = 'build'
+		description = "Runs ${name} in every build of the composite."
+		dependsOn builds.collect { gradle.includedBuild(it).task(":${name}") }
+	}
+}
