@@ -2,6 +2,7 @@ package de.raindancer.hyades.fabric.gametest;
 
 import de.raindancer.client.protocol.ClientFeature;
 import de.raindancer.hyades.fabric.HyadesMod;
+import de.raindancer.hyades.hud.HudState;
 import de.raindancer.hyades.link.ClientLink;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.world.scores.DisplaySlot;
 
 /**
  * Boots a real client and fails the build if the mod does not come up.
@@ -65,6 +67,20 @@ public class HyadesStartupTest implements FabricClientGameTest {
 				&& client.getOverlay() == null, 3 * TWENTY_SECONDS);
 		context.waitTicks(10);
 		context.takeScreenshot("hyades_connected");
+
+		// With the end-to-end plugin on the server: what it put up as a sidebar has to be in the mod's HUD
+		// now, and the sidebar itself gone from the client.
+		if (Boolean.getBoolean("hyades.e2e.hud")) {
+			context.waitFor(client -> HyadesMod.get().link().hud().panel().isPresent()
+					&& client.level.getScoreboard().getDisplayObjective(DisplaySlot.SIDEBAR) == null, TWENTY_SECONDS);
+			HudState.Panel panel = HyadesMod.get().link().hud().panel().orElseThrow();
+			if (!"Hyades".equals(panel.title().plain()) || panel.lines().size() != 6
+					|| !"Drachma  ₯ 12,480".equals(panel.lines().get(0).plain())) {
+				throw new AssertionError("Not the panel the server put up: " + panel);
+			}
+			context.waitTicks(10);
+			context.takeScreenshot("hyades_hud");
+		}
 
 		context.runOnClient(client -> client.disconnectFromWorld(net.minecraft.network.chat.Component.empty()));
 		context.waitFor(client -> HyadesMod.get().link().connection().isEmpty(), TWENTY_SECONDS);

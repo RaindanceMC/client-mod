@@ -20,7 +20,7 @@ public final class ConnectedToast {
     public static final int MARGIN = 6;
     public static final int TRAVEL = 4;
 
-    private static final int PAD_X = 6;
+    private static final int PAD_X = 5;
     private static final int PAD_Y = 4;
     private static final int GAP = 2;
 
@@ -43,18 +43,18 @@ public final class ConnectedToast {
             return;
         }
         Theme theme = connection.theme();
-        int room = canvas.width() - 2 * MARGIN - 2 * PAD_X - 2;
+        int room = canvas.width() - 2 * MARGIN - 2 * PAD_X;
         String title = fitted(canvas, connection.serverName(), room);
         String line = fitted(canvas, label, room);
 
-        int width = Math.max(canvas.textWidth(title), canvas.textWidth(line)) + 2 * PAD_X + 2;
-        int height = 2 * canvas.lineHeight() + GAP + 2 * PAD_Y + 2;
+        int width = Math.max(canvas.textWidth(title), canvas.textWidth(line)) + 2 * PAD_X;
+        int height = 2 * canvas.lineHeight() + GAP + 2 * PAD_Y;
         int x = MARGIN;
         int y = MARGIN - Math.round((1 - alpha) * TRAVEL);
 
         Plate.draw(canvas, x, y, width, height, theme, alpha);
-        text(canvas, title, x + 1 + PAD_X, y + 1 + PAD_Y, Colours.fade(theme.sky(), alpha));
-        text(canvas, line, x + 1 + PAD_X, y + 1 + PAD_Y + canvas.lineHeight() + GAP, Colours.fade(theme.muted(), alpha));
+        text(canvas, title, x + PAD_X, y + PAD_Y, Colours.fade(theme.sky(), alpha));
+        text(canvas, line, x + PAD_X, y + PAD_Y + canvas.lineHeight() + GAP, Colours.fade(theme.muted(), alpha));
     }
 
     private static void text(Canvas canvas, String text, int x, int y, int argb) {

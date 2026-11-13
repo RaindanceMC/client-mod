@@ -2,6 +2,7 @@ package de.raindancer.hyades.fabric;
 
 import de.raindancer.hyades.link.ClientLink;
 import de.raindancer.hyades.ui.ConnectedToast;
+import de.raindancer.hyades.ui.PanelView;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -62,6 +63,15 @@ public final class HyadesMod implements ClientModInitializer {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> link.disconnected());
 
+		// The panel shows while a screen is open too, as the sidebar did; only the pack loading over
+		// everything hides it.
+		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(ID, "panel"), (graphics, delta) -> {
+			Minecraft client = Minecraft.getInstance();
+			if (client.gui.overlay() == null) {
+				link.connection().ifPresent(connection -> link.hud().panel().ifPresent(panel -> PanelView.draw(
+						new FabricCanvas(graphics, client.font), connection.theme(), panel, System.currentTimeMillis())));
+			}
+		});
 		ConnectedToast connected = new ConnectedToast();
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(ID, "connected"), (graphics, delta) -> {
 			Minecraft client = Minecraft.getInstance();

@@ -1,5 +1,7 @@
 package de.raindancer.hyades.ui;
 
+import de.raindancer.client.protocol.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +11,12 @@ final class RecordingCanvas implements Canvas {
     record Fill(int x, int y, int width, int height, int argb) {
     }
 
-    record Text(String text, int x, int y, int argb) {
+    /** @param argb the colour text without one of its own was to be drawn in */
+    record Drawn(String text, int x, int y, int argb, int width) {
     }
 
     final List<Fill> fills = new ArrayList<>();
-    final List<Text> texts = new ArrayList<>();
+    final List<Drawn> texts = new ArrayList<>();
     private final int width;
     private final int height;
 
@@ -38,8 +41,8 @@ final class RecordingCanvas implements Canvas {
     }
 
     @Override
-    public int textWidth(String text) {
-        return text.length() * 6;
+    public int textWidth(Text text) {
+        return text.plain().length() * 6;
     }
 
     @Override
@@ -48,7 +51,7 @@ final class RecordingCanvas implements Canvas {
     }
 
     @Override
-    public void text(String text, int x, int y, int argb) {
-        texts.add(new Text(text, x, y, argb));
+    public void text(Text text, int x, int y, int argb) {
+        texts.add(new Drawn(text.plain(), x, y, argb, textWidth(text)));
     }
 }

@@ -1,0 +1,12 @@
+name: HyadesE2e
+version: '${version}'
+main: de.raindancer.hyades.e2e.E2ePlugin
+api-version: '26.3'
+description: Shows every player a sidebar and an action bar through RainsCore, for the client mod's end-to-end test.
+
+dependencies:
+  server:
+    RainsCore:
+      load: BEFORE
+      required: true
+      join-classpath: true

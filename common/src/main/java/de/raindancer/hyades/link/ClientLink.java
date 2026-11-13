@@ -9,6 +9,7 @@ import de.raindancer.client.protocol.MalformedPacketException;
 import de.raindancer.client.protocol.Theme;
 import de.raindancer.client.protocol.Welcome;
 import de.raindancer.client.protocol.Wire;
+import de.raindancer.hyades.hud.HudState;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -48,6 +49,8 @@ public final class ClientLink {
     private final String modVersion;
     private final String minecraft;
 
+    private final HudState hud = new HudState();
+
     private boolean greeted;
     private Connection connection;
 
@@ -73,6 +76,9 @@ public final class ClientLink {
             ClientCodec.decodeClientbound(frame).ifPresent(packet -> {
                 if (packet instanceof Welcome welcome) {
                     welcomed(welcome);
+                } else if (connection != null && connection.agreed().containsKey(packet.feature())) {
+                    // Only what was agreed: a server may not use a feature this session never settled.
+                    hud.accept(packet, clock.getAsLong());
                 }
             });
         } catch (MalformedPacketException notAPacket) {
@@ -83,6 +89,12 @@ public final class ClientLink {
     public synchronized void disconnected() {
         greeted = false;
         connection = null;
+        hud.reset();
+    }
+
+    /** What the server last said the HUD shows; empty on a server that never agreed the HUD. */
+    public HudState hud() {
+        return hud;
     }
 
     public synchronized Optional<Connection> connection() {

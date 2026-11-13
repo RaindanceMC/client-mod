@@ -42,7 +42,7 @@ class ClientLinkTest {
 
         assertThat(sent).hasSize(1);
         assertThat(ClientCodec.decodeServerbound(sent.get(0))).contains(new Hello(Wire.PROTOCOL, "0.1.0", "26.3",
-                List.of(FeatureRange.of(ClientFeature.SESSION)), 3, "de_de"));
+                List.of(FeatureRange.of(ClientFeature.SESSION), FeatureRange.of(ClientFeature.HUD)), 3, "de_de"));
         assertThat(link.connection()).isEmpty();
     }
 
@@ -89,6 +89,26 @@ class ClientLinkTest {
         link.received(new byte[]{0, 0, 1, 9, 9});
         link.received(new byte[]{99, 1, 2});
         assertThat(link.connection()).isEmpty();
+    }
+
+    @Test
+    void theHudIsFilledOnlyByAServerThatAgreedIt() {
+        byte[] panel = ClientCodec.encode(new de.raindancer.client.protocol.HudPanel(
+                de.raindancer.client.protocol.Text.of("Hyades"), List.of()));
+        link.serverListens(2, "en_us");
+        link.received(panel);
+        assertThat(link.hud().panel()).as("before any welcome").isEmpty();
+
+        link.received(welcome());
+        link.received(panel);
+        assertThat(link.hud().panel()).as("the session alone is not the HUD").isEmpty();
+
+        link.received(welcome(1, new FeatureVersion(ClientFeature.SESSION.id(), 1), new FeatureVersion(ClientFeature.HUD.id(), 1)));
+        link.received(panel);
+        assertThat(link.hud().panel()).isPresent();
+
+        link.disconnected();
+        assertThat(link.hud().panel()).isEmpty();
     }
 
     @Test

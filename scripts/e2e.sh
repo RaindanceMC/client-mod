@@ -14,6 +14,10 @@ while [ $# -gt 0 ] && [ "$1" != "--" ]; do plugins+=("$1"); shift; done
 versions=("$@"); [ ${#versions[@]} -gt 0 ] || versions=(26.3 26.2 1.21.11)
 
 here="$(cd "$(dirname "$0")/.." && pwd)"
+
+# What a module would do: a sidebar and an action bar through RainsCore, for the clients to be shown.
+"$here/gradlew" -q -p "$here/e2e-plugin" build
+plugins+=("$(ls "$here"/e2e-plugin/build/libs/hyades-e2e-plugin-*.jar | sort -V | tail -1)")
 folder="$(mktemp -d -t hyades-e2e-XXXXXX)"
 port=25610
 mkdir -p "$folder/plugins"
@@ -45,11 +49,12 @@ done
 failed=0
 for version in "${versions[@]}"; do
 	if "$here/scripts/headless.sh" "$here/gradlew" --no-daemon -p "$here/versions/fabric-$version" runClientGameTest \
-			-Phyades.e2e.server=127.0.0.1:$port "-Phyades.e2e.name=Hyades E2E" > "$folder/client-$version.log" 2>&1; then
-		echo "HYADES-E2E $version: WELCOMED"
+			-Phyades.e2e.server=127.0.0.1:$port "-Phyades.e2e.name=Hyades E2E" -Phyades.e2e.hud=true > "$folder/client-$version.log" 2>&1; then
+		echo "HYADES-E2E $version: WELCOMED, HUD SHOWN"
 	else
 		echo "HYADES-E2E $version: FAILED, see $folder/client-$version.log"
 		failed=1
 	fi
 done
+echo "server folder and logs: $folder"
 exit $failed

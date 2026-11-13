@@ -29,7 +29,7 @@ fabricApi {
 loom {
 	runs.configureEach { run ->
 		if (run.name == 'clientGameTest') {
-			['hyades.e2e.server', 'hyades.e2e.name'].each { key ->
+			['hyades.e2e.server', 'hyades.e2e.name', 'hyades.e2e.hud'].each { key ->
 				if (project.hasProperty(key)) {
 					run.property key, project.property(key).toString()
 				}

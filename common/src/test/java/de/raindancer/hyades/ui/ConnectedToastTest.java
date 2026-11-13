@@ -59,7 +59,7 @@ class ConnectedToastTest {
     void atRestItIsAPlateInTheTopLeftWithTheServerInSkyAndTheLabelMuted() {
         RecordingCanvas canvas = drawn(2000, "Hyades", 480);
 
-        assertThat(canvas.texts).extracting(RecordingCanvas.Text::text).containsExactly("Hyades", "Client mod connected");
+        assertThat(canvas.texts).extracting(RecordingCanvas.Drawn::text).containsExactly("Hyades", "Client mod connected");
         assertThat(canvas.texts.get(0).argb()).isEqualTo(THEME.sky());
         assertThat(canvas.texts.get(1).argb()).isEqualTo(THEME.muted());
 
@@ -70,25 +70,26 @@ class ConnectedToastTest {
         assertThat(left).isEqualTo(ConnectedToast.MARGIN);
         assertThat(right).as("clear of the game's own toasts, 160 wide in the top right").isLessThan(480 - 160);
         assertThat(top).isEqualTo(ConnectedToast.MARGIN);
-        for (RecordingCanvas.Text text : canvas.texts) {
+        for (RecordingCanvas.Drawn text : canvas.texts) {
             assertThat(text.x()).isGreaterThan(left);
-            assertThat(text.x() + canvas.textWidth(text.text())).isLessThan(right);
+            assertThat(text.x() + text.width()).isLessThan(right);
             assertThat(text.y()).isGreaterThan(top);
             assertThat(text.y() + canvas.lineHeight()).isLessThan(bottom);
         }
     }
 
     @Test
-    void thePlateIsNavyOnNightWithASolidEdgeUnderIt() {
+    void thePlateIsOneSeeThroughNavyShapeWithNothingAroundIt() {
         RecordingCanvas canvas = drawn(2000, "Hyades", 480);
         assertThat(canvas.fills).extracting(RecordingCanvas.Fill::argb)
-                .containsOnly(THEME.night(), Colours.fade(THEME.navy(), Plate.FILL_OPACITY));
-
-        RecordingCanvas.Fill navy = canvas.fills.stream().filter(fill -> fill.argb() != THEME.night()).findFirst().orElseThrow();
-        int bottom = canvas.fills.stream().mapToInt(fill -> fill.y() + fill.height()).max().orElseThrow();
-        int top = canvas.fills.stream().mapToInt(RecordingCanvas.Fill::y).min().orElseThrow();
-        assertThat(navy.y() - top).as("outline above").isEqualTo(1);
-        assertThat(bottom - (navy.y() + navy.height())).as("outline and extrusion below").isEqualTo(1 + Plate.EXTRUSION);
+                .containsOnly(Colours.fade(THEME.navy(), Plate.FILL_OPACITY));
+        assertThat(Plate.FILL_OPACITY).as("the world stays visible through it").isLessThanOrEqualTo(0.5f);
+        for (RecordingCanvas.Fill one : canvas.fills) {
+            for (RecordingCanvas.Fill other : canvas.fills) {
+                boolean apart = one == other || one.y() + one.height() <= other.y() || other.y() + other.height() <= one.y();
+                assertThat(apart).as("see-through fills that overlap show as a darker patch").isTrue();
+            }
+        }
     }
 
     @Test
@@ -112,7 +113,7 @@ class ConnectedToastTest {
     @Test
     void textIsNeverDrawnSoFaintThatTheGameMakesItSolid() {
         for (long age = 0; age <= ConnectedToast.IN + ConnectedToast.HOLD + ConnectedToast.OUT; age++) {
-            for (RecordingCanvas.Text text : drawn(age, "Hyades", 480).texts) {
+            for (RecordingCanvas.Drawn text : drawn(age, "Hyades", 480).texts) {
                 assertThat(alpha(text.argb())).as("at %d ms", age).isGreaterThanOrEqualTo(Colours.FAINTEST_TEXT);
             }
         }
@@ -124,6 +125,6 @@ class ConnectedToastTest {
         int right = canvas.fills.stream().mapToInt(fill -> fill.x() + fill.width()).max().orElseThrow();
         assertThat(right).isLessThanOrEqualTo(200 - ConnectedToast.MARGIN);
         assertThat(canvas.texts.get(0).text()).endsWith("…").hasSizeLessThan(64);
-        assertThat(canvas.texts.get(0).x() + canvas.textWidth(canvas.texts.get(0).text())).isLessThan(200 - ConnectedToast.MARGIN);
+        assertThat(canvas.texts.get(0).x() + canvas.texts.get(0).width()).isLessThan(200 - ConnectedToast.MARGIN);
     }
 }
