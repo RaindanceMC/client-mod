@@ -1,0 +1,16 @@
+{
+	"schemaVersion": 1,
+	"id": "hyades-test",
+	"version": "0.1.0",
+	"name": "Hyades Client Game Tests",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"de.raindancer.hyades.fabric.gametest.HyadesStartupTest"
+		]
+	},
+	"depends": {
+		"hyades": "*",
+		"fabric-client-gametest-api-v1": "*"
+	}
+}

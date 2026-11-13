@@ -1,0 +1,74 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+// The Minecraft version is in the file name, so a player downloading from a release page can tell
+// which game it is for.
+base {
+	archivesName = "hyades-mc${project.minecraft_version}"
+}
+
+repositories {
+	mavenCentral()
+}
+
+// Boots a real client and fails the build if the mod does not come up. With -Phyades.e2e.server=host:port
+// the same client then joins that server and has to be welcomed by its RainsCore.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = 'hyades-test'
+		eula = true
+		enableGameTests = false
+	}
+}
+
+loom {
+	runs.configureEach { run ->
+		if (run.name == 'clientGameTest') {
+			['hyades.e2e.server', 'hyades.e2e.name'].each { key ->
+				if (project.hasProperty(key)) {
+					run.property key, project.property(key).toString()
+				}
+			}
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Everything that does not touch a Minecraft class, and the wire format RainsCore carries too. Both ride
+	// inside this jar (jar-in-jar): a player installs one file.
+	include implementation("de.raindancer:hyades-common:${project.mod_version}")
+	include implementation("de.raindancer:rains-client-protocol:${project.protocol_version}")
+}
+
+processResources {
+	def props = [
+		version           : project.version,
+		minecraft_version : project.minecraft_version,
+		loader_version    : project.loader_version,
+		java_version      : '25'
+	]
+	inputs.properties props
+
+	filesMatching('fabric.mod.json') {
+		expand props
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = 'UTF-8'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}

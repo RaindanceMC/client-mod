@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "hyades",
+	"version": "${version}",
+	"name": "Hyades",
+	"description": "The client side of hyadesmc.net: draws what the server's plugins otherwise fake with sidebars, action bars and particles. Silent on every server that does not ask for it, and never needed to play.",
+	"authors": [
+		"Raindancer118"
+	],
+	"contact": {
+		"homepage": "https://hyadesmc.net",
+		"sources": "https://github.com/RaindanceMC/client-mod"
+	},
+	"license": "All-Rights-Reserved",
+	"icon": "assets/hyades/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"de.raindancer.hyades.fabric.HyadesMod"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=${java_version}",
+		"fabric-api": "*"
+	}
+}
