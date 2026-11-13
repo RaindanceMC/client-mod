@@ -4,7 +4,7 @@ The client side of [hyadesmc.net](https://hyadesmc.net): a Fabric mod that draws
 otherwise fake with sidebars, action bars and particles. It is never needed to play, says nothing to a server
 that did not ask for it, and is only ever sent what a player without it could see too.
 
-Works with any server running [RainsCore](https://github.com/RaindanceMC/RainsCore) 2.90.0 or newer; the server
+Works with any server running [RainsCore](https://github.com/RaindanceMC/RainsCore) 2.91.0 or newer; the server
 sends its own name and colours.
 
 | Game | File | Java |
@@ -16,10 +16,13 @@ sends its own name and colours.
 Needs Fabric Loader and Fabric API. Older clients reach a 26.3 server through ViaVersion + ViaBackwards on
 the server; the mod's channel passes through untouched.
 
-## What it does today (0.1.0)
+## What it does today (0.2.0)
 
-The handshake, and one plate that says so: joining a server that speaks to the mod shows its name and
-"Client mod connected" for four seconds in the top left. Everything else builds on this.
+- Joining a server that speaks to the mod shows its name and "Client mod connected" for four seconds.
+- The server's sidebar is drawn by the mod instead: the same lines, in the server's own typeface, on a
+  see-through plate no wider than the text. Nothing else of the game's HUD is touched.
+
+What it is for is what a server cannot do by itself — real screens and configurable hotkeys come next.
 
 ## Layout
 
