@@ -41,6 +41,9 @@ jobs:
       - name: Build and unit test
         run: ./gradlew build
 
+      - name: A virtual screen and software OpenGL
+        run: sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri libegl1 libglx-mesa0
+
       # A real client per version; in a singleplayer world the mod has to stay silent.
       - name: Client startup test (26.3)
         timeout-minutes: 15
