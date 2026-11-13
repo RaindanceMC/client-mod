@@ -1,0 +1,87 @@
+plugins {
+	// 1.21.x is the last game that ships obfuscated, so this build remaps where the 26.x ones do not.
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = "hyades-mc${project.minecraft_version}"
+}
+
+repositories {
+	mavenCentral()
+}
+
+// Boots a real client and fails the build if the mod does not come up. With -Phyades.e2e.server=host:port
+// the same client then joins that server — a newer one, through ViaBackwards — and has to be welcomed.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = 'hyades-test'
+		eula = true
+		enableGameTests = false
+	}
+}
+
+// Lang files, icon and descriptor are the 26.3 ones; only the code differs, by the names the game gives things.
+sourceSets {
+	main {
+		resources.srcDirs = ['../fabric-26.3/src/main/resources']
+	}
+	gametest {
+		resources.srcDirs = ['../fabric-26.3/src/gametest/resources']
+	}
+}
+
+loom {
+	runs.configureEach { run ->
+		if (run.name == 'clientGameTest') {
+			['hyades.e2e.server', 'hyades.e2e.name'].each { key ->
+				if (project.hasProperty(key)) {
+					run.property key, project.property(key).toString()
+				}
+			}
+			// This version's test API keeps the client in step with its own built-in server and takes a
+			// real server's connection for somebody meddling with packets; it says to switch that off.
+			if (project.hasProperty('hyades.e2e.server')) {
+				run.property 'fabric.client.gametest.disableNetworkSynchronizer', 'true'
+			}
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	include implementation("de.raindancer:hyades-common:${project.mod_version}")
+	include implementation("de.raindancer:rains-client-protocol:${project.protocol_version}")
+}
+
+processResources {
+	def props = [
+		version           : project.version,
+		minecraft_version : project.minecraft_version,
+		loader_version    : project.loader_version,
+		java_version      : '21'
+	]
+	inputs.properties props
+
+	filesMatching('fabric.mod.json') {
+		expand props
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+	it.options.encoding = 'UTF-8'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}

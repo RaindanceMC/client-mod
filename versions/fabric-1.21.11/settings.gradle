@@ -1,0 +1,17 @@
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+apply from: '../../gradle/shared.gradle'
+
+rootProject.name = 'hyades-fabric-1.21.11'
+
+// Gradle substitutes de.raindancer:hyades-common with this build's output.
+includeBuild '../../common'
