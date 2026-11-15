@@ -3,7 +3,7 @@
 	"id": "hyades",
 	"version": "${version}",
 	"name": "Hyades",
-	"description": "The client side of hyadesmc.net: draws what the server's plugins otherwise fake with sidebars, action bars and particles. Silent on every server that does not ask for it, and never needed to play.",
+	"description": "The client side of hyadesmc.net. It draws what the server's plugins otherwise fake with sidebars, action bars and particles. It does nothing on servers that do not ask for it and is never needed to play.",
 	"authors": [
 		"Raindancer118"
 	],
